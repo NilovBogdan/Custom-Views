@@ -23,10 +23,11 @@ class StatsView @JvmOverloads constructor(
     defStyleRes: Int = 0,
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
     private var radius = 0F
-    private var center = PointF(0F, 0F)
-    private var oval = RectF(0F, 0F, 0F, 0F)
+    private var center = PointF()
+    private var oval = RectF()
     private var animator: Animator? = null
     private var progress = 0F
+
 
     private var lineWidth = AndroidUtils.dp(context, 5F).toFloat()
     private var fontSize = AndroidUtils.dp(context, 40F).toFloat()
@@ -73,56 +74,57 @@ class StatsView @JvmOverloads constructor(
             return
         }
         var startFrom = -90F
-
         val text = data.sum() / data.maxOrNull()!! * 100F / data.count()
-
         canvas.drawText(
             "%.2f%%".format(text),
             center.x,
             center.y + textPaint.textSize / 4,
             textPaint,
-        )
-        if (text == 100F) {
-            paint.color = colors[0]
-            canvas.drawArc(oval, startFrom + rotation, 1F, false, paint)
-        }
+
+            )
 
 
-        val max = data.sum() / data.maxOrNull()!! / data.count() * 360F
-        val progressAngle = progress * 360F
-
-
-
-        if (progressAngle > max) {
-            for ((index, datum) in data.withIndex()) {
-                val angle = (datum / data.maxOrNull()!!.times(data.count())) * 360F
-                paint.color = colors.getOrNull(index) ?: randomColor()
-                canvas.drawArc(oval, startFrom, angle , false, paint)
-                startFrom += angle
-            }
-            return
-        }
-
-        var filled = 0F
+//        val max = data.sum() / data.maxOrNull()!! / data.count() * 360F
+//        val progressAngle = progress * 360F
+//
+//
+//
+//        if (progressAngle > max) {
+//            for ((index, datum) in data.withIndex()) {
+//                val angle = (datum / data.maxOrNull()!!.times(data.count())) * 360F
+//                paint.color = colors.getOrNull(index) ?: randomColor()
+//                canvas.drawArc(oval, startFrom, angle , false, paint)
+//                startFrom += angle
+//            }
+//            return
+//        }
+////
+//        var filled = 0F
+////
+//        for ((index, datum) in data.withIndex()) {
+//            val angle = (datum / data.maxOrNull()!!.times(data.count())) * 360F
+//            paint.color = colors.getOrNull(index) ?: randomColor()
+//            canvas.drawArc(oval, startFrom, progressAngle - filled, false, paint)
+//            startFrom += angle
+//            filled += angle
+//            if (filled > progressAngle) return
+//        }
 
         for ((index, datum) in data.withIndex()) {
             val angle = (datum / data.maxOrNull()!!.times(data.count())) * 360F
             paint.color = colors.getOrNull(index) ?: randomColor()
-            canvas.drawArc(oval, startFrom, progressAngle - filled, false, paint)
+            canvas.drawArc(oval, startFrom, angle * progress, false, paint)
             startFrom += angle
-            filled += angle
-            if (filled > progressAngle) return
-        }
 
-//        for ((index, datum) in data.withIndex()) {
-//            val angle = (datum / data.maxOrNull()!!.times(data.count())) * 360F
-//            paint.color = colors.getOrNull(index) ?: randomColor()
-//            canvas.drawArc(oval, startFrom, angle, false, paint)
-//            startFrom += angle
-//        }
+        }
+        if (text == 100F) {
+            paint.color = colors[0]
+            canvas.drawArc(oval, startFrom, 1F, false, paint)
+        }
 
 
     }
+
 
     private fun update() {
         animator?.let {
@@ -135,15 +137,19 @@ class StatsView @JvmOverloads constructor(
         animator = ValueAnimator.ofFloat(0F, 1F).apply {
             addUpdateListener { anim ->
                 progress = anim.animatedValue as Float
+
+                rotation = progress * 360F
+                duration = 2_000
+                interpolator = LinearInterpolator()
                 invalidate()
             }
-            duration = 5_000
-            interpolator = LinearInterpolator()
+
         }.also {
+
             it.start()
         }
     }
 
 
-private fun randomColor() = Random.nextInt(0xFF000000.toInt(), 0xFFFFFFFF.toInt())
+    private fun randomColor() = Random.nextInt(0xFF000000.toInt(), 0xFFFFFFFF.toInt())
 }

@@ -13,12 +13,13 @@
         android:toYScale="1.25" />
 
     <rotate
-        android:duration="1000"
+        android:interpolator="@android:anim/accelerate_decelerate_interpolator"
         android:fromDegrees="0"
+        android:toDegrees="360"
         android:pivotX="50%"
         android:pivotY="50%"
-        android:repeatCount="1"
+        android:duration="500"
         android:repeatMode="reverse"
-        android:startOffset="1000"
-        android:toDegrees="360" />
+        android:repeatCount="1"
+        android:startOffset="500" />
 </set>
