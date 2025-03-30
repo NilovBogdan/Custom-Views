@@ -1,10 +1,8 @@
 package ru.netology.statsview.ui
 
-import android.annotation.SuppressLint
+
 import android.os.Bundle
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.widget.TextView
+
 import androidx.appcompat.app.AppCompatActivity
 
 import ru.netology.statsview.R

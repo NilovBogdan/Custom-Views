@@ -2,6 +2,7 @@ package ru.netology.statsview.ui
 
 import android.animation.Animator
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -27,6 +28,7 @@ class StatsView @JvmOverloads constructor(
     private var oval = RectF()
     private var animator: Animator? = null
     private var progress = 0F
+    private var startFrom = -90F
 
 
     private var lineWidth = AndroidUtils.dp(context, 5F).toFloat()
@@ -60,6 +62,7 @@ class StatsView @JvmOverloads constructor(
             update()
         }
 
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         radius = min(w, h) / 2F - lineWidth / 2
         center = PointF(w / 2F, h / 2F)
@@ -73,7 +76,7 @@ class StatsView @JvmOverloads constructor(
         if (data.isEmpty()) {
             return
         }
-        var startFrom = -90F
+
         val text = data.sum() / data.maxOrNull()!! * 100F / data.count()
         canvas.drawText(
             "%.2f%%".format(text),
@@ -113,13 +116,13 @@ class StatsView @JvmOverloads constructor(
         for ((index, datum) in data.withIndex()) {
             val angle = (datum / data.maxOrNull()!!.times(data.count())) * 360F
             paint.color = colors.getOrNull(index) ?: randomColor()
-            canvas.drawArc(oval, startFrom, angle * progress, false, paint)
+            canvas.drawArc(oval, startFrom , angle * progress, false, paint)
             startFrom += angle
 
         }
         if (text == 100F) {
             paint.color = colors[0]
-            canvas.drawArc(oval, startFrom, 1F, false, paint)
+            canvas.drawArc(oval, startFrom , 1F, false, paint)
         }
 
 
@@ -131,21 +134,16 @@ class StatsView @JvmOverloads constructor(
             it.removeAllListeners()
             it.cancel()
         }
-
         progress = 0F
-
         animator = ValueAnimator.ofFloat(0F, 1F).apply {
             addUpdateListener { anim ->
                 progress = anim.animatedValue as Float
-
-                rotation = progress * 360F
-                duration = 2_000
+                startFrom = progress * 360F - 90F
+                duration = 5000
                 interpolator = LinearInterpolator()
                 invalidate()
             }
-
         }.also {
-
             it.start()
         }
     }
